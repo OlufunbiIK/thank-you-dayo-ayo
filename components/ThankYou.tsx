@@ -51,6 +51,97 @@ function Burst({ n = 26 }: { n?: number }) {
   );
 }
 
+/* Petals drifting down behind the gift */
+function Petals({ n = 14 }: { n?: number }) {
+  const ps = useMemo(
+    () =>
+      Array.from({ length: n }, (_, i) => ({
+        x: (i * 37) % 100,
+        s: 0.6 + ((i * 7) % 5) / 10,
+        dur: 9 + (i % 5) * 2,
+        delay: -((i * 1.3) % 12),
+        sway: 20 + (i % 4) * 15,
+      })),
+    [n],
+  );
+  return (
+    <div className="petals" aria-hidden="true">
+      {ps.map((p, i) => (
+        <i
+          key={i}
+          style={
+            {
+              left: `${p.x}%`,
+              "--s": p.s,
+              "--sway": `${p.sway}px`,
+              animationDuration: `${p.dur}s`,
+              animationDelay: `${p.delay}s`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+/* Full-screen confetti rain when the gift is sent */
+function Confetti({ n = 44 }: { n?: number }) {
+  const bits = useMemo(
+    () =>
+      Array.from({ length: n }, (_, i) => ({
+        x: (i * 53) % 100,
+        d: (i % 7) * 0.12,
+        dur: 2.4 + (i % 5) * 0.35,
+        k: i % 4,
+        r: (i * 47) % 360,
+        sway: (i % 2 ? 1 : -1) * (20 + (i % 3) * 18),
+      })),
+    [n],
+  );
+  return (
+    <div className="confetti" aria-hidden="true">
+      {bits.map((b, i) => (
+        <i
+          key={i}
+          className={`k${b.k}`}
+          style={
+            {
+              left: `${b.x}%`,
+              "--r": `${b.r}deg`,
+              "--sway": `${b.sway}px`,
+              animationDuration: `${b.dur}s`,
+              animationDelay: `${b.d}s`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+/* Amount counts up from ₦0 */
+function CountUp({ to, run }: { to: number; run: boolean }) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    if (!run) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setV(to);
+      return;
+    }
+    let raf = 0;
+    const t0 = performance.now() + 400,
+      d = 1400;
+    const tick = (t: number) => {
+      const k = Math.min(1, Math.max(0, (t - t0) / d));
+      setV(Math.round(to * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [run, to]);
+  return <>{naira(v)}</>;
+}
+
 export default function ThankYou({
   guest,
   fallbackName,
@@ -69,6 +160,7 @@ export default function ThankYou({
     guest?.claimed ? "done" : "idle",
   );
   const [error, setError] = useState("");
+  const [party, setParty] = useState(false);
   const [sentTo, setSentTo] = useState(guest?.claimed ? guest.phoneMasked : "");
   const [useOther, setUseOther] = useState(!guest?.phoneMasked);
   const [form, setForm] = useState({
@@ -123,7 +215,7 @@ export default function ThankYou({
       if (!guest && !form.name.trim()) return setError("Please add your name.");
       if (!p)
         return setError(
-          "That number doesn't look right. Use the 11-digit format, e.g. 0805 036 6355.",
+          "That number doesn't look right. Use the 11-digit format, e.g. 0805 0377 775.",
         );
       if (!form.network) return setError("Please pick your network.");
       Object.assign(payload, {
@@ -147,6 +239,8 @@ export default function ThankYou({
       }
       setSentTo(data.phone || "");
       setClaim("done");
+      setParty(true);
+      setTimeout(() => setParty(false), 4500);
     } catch {
       setClaim("error");
       setError("No connection. Please try again.");
@@ -174,6 +268,7 @@ export default function ThankYou({
             alt=""
             aria-hidden="true"
           />
+          <Petals />
           <div className="gate-copy">
             <p className="kicker">
               From {COUPLE.bride} &amp; {COUPLE.groom}
@@ -195,6 +290,14 @@ export default function ThankYou({
             aria-label="Unwrap your gift"
           >
             <span className="glow" />
+            <span className="sparkles" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
             <img
               className="gift-img closed"
               src="/img/gift-closed.jpg"
@@ -220,7 +323,9 @@ export default function ThankYou({
         <section className="gift">
           <div className="gift-card">
             <span className="tagline-k">A little thank-you</span>
-            <p className="big-amt foil">{naira(amount)}</p>
+            <p className="big-amt foil">
+              <CountUp to={amount} run={stage === 3} />
+            </p>
             <p className="amt-sub">
               airtime, on {COUPLE.bride} &amp; {COUPLE.groom} 🎁
             </p>
@@ -242,7 +347,7 @@ export default function ThankYou({
                   !
                 </p>
                 <p className="note">
-                  Check your phone 📱 It can take a minute to land.
+                  Check your phone. It can take a minute to land.
                 </p>
               </div>
             ) : (
@@ -298,7 +403,11 @@ export default function ThankYou({
                     </div>
                   </>
                 )}
-                {error && <p className="err">{error}</p>}
+                {error && (
+                  <p className="err" key={error}>
+                    {error}
+                  </p>
+                )}
                 <button
                   className="btn"
                   onClick={send}
@@ -309,7 +418,7 @@ export default function ThankYou({
                       <span className="spin" /> Sending…
                     </>
                   ) : (
-                    "Send it to me 📲"
+                    "Send it to me"
                   )}
                 </button>
                 {guest && (
@@ -339,18 +448,19 @@ export default function ThankYou({
                 alt={`${COUPLE.bride} and ${COUPLE.groom}`}
               />
             </div>
-            <div className="words rv">
-              <p className="kicker">A note from us</p>
-              <p className="msg">
-                {first ? `Dear ${first}, ` : ""}
-                {COUPLE.message}
-              </p>
-              <p className="sign">
-                With love,{" "}
-                <span className="foil">
-                  {COUPLE.bride} &amp; {COUPLE.groom}
-                </span>
-              </p>
+            <div className="paper rv">
+              <div className="hand">
+                <p className="dear">
+                  {first ? `Dear ${first},` : "Dear friend,"}
+                </p>
+                <p className="msg">{COUPLE.message}</p>
+                <p className="sign">
+                  With love,
+                  <span>
+                    {COUPLE.bride} &amp; {COUPLE.groom}
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -395,6 +505,7 @@ export default function ThankYou({
           </a>
         </footer>
       </main>
+      {party && <Confetti />}
     </>
   );
 }

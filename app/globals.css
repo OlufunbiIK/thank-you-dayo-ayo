@@ -743,6 +743,114 @@ section {
   font-size: 1.25em;
 }
 
+/* ═════════ Handwritten letter ═════════ */
+:root {
+  --hand: "Caveat", "Segoe Print", cursive;
+  --script: "Mrs Saint Delafield", cursive;
+  --ink: #5b3340;
+}
+.paper {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
+  background:
+    url(/img/letter-paper.jpg) center / cover no-repeat,
+    #f8f1e8;
+  border-radius: 4px;
+  box-shadow:
+    0 40px 70px -40px rgba(90, 64, 56, 0.6),
+    0 2px 6px rgba(90, 64, 56, 0.12);
+  rotate: -1.2deg;
+  text-align: left;
+  container-type: inline-size;
+}
+
+.hand {
+  position: absolute;
+  inset: 17% 17% 15% 17%;
+  display: block;
+  font-family: var(--hand);
+  font-weight: 500;
+  font-size: clamp(16px, 4.7cqi, 27px);
+  line-height: 1.6;
+  color: var(--ink);
+  -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent 55%);
+  mask-image: linear-gradient(180deg, #000 45%, transparent 55%);
+  -webkit-mask-size: 100% 220%;
+  mask-size: 100% 220%;
+  -webkit-mask-position: 0 100%;
+  mask-position: 0 100%;
+  transition:
+    -webkit-mask-position 4.5s cubic-bezier(0.4, 0.1, 0.4, 1) 0.7s,
+    mask-position 4.5s cubic-bezier(0.4, 0.1, 0.4, 1) 0.7s;
+}
+.paper.in .hand {
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+}
+
+.hand::before {
+  content: "";
+  float: right;
+  width: 34cqi;
+  height: 30cqi;
+} /* space for the rose */
+
+.hand p {
+  margin: 0;
+}
+.hand .dear {
+  font-weight: 600;
+  font-size: 1.15em;
+  margin-bottom: 0.35em;
+}
+.paper .msg {
+  max-width: none;
+  margin: 0;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+.hand .sign {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  text-align: right;
+  font-family: inherit;
+  font-style: normal;
+  font-size: 1em;
+  color: inherit;
+}
+
+.hand .sign span {
+  display: block;
+  font-family: var(--script);
+  font-size: 1.9em;
+  line-height: 1;
+  color: var(--rose-deep);
+  margin-top: 0.1em;
+}
+
+.letter .photo {
+  rotate: 2deg;
+  aspect-ratio: 3 / 4;
+  max-width: 460px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hand {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
 .wish {
   background: var(--blush-soft);
 }
@@ -1058,6 +1166,323 @@ footer {
   }
 }
 
+/* ═════════ Animations ═════════ */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(6px);
+  }
+}
+
+/* Gate: title + button rise in, petals drift, sparkles twinkle */
+.gate-copy > * {
+  animation: rise 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.gate-copy > :nth-child(2) {
+  animation-delay: 0.25s;
+}
+.gate.s0 .open-btn {
+  animation:
+    rise 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.6s both,
+    nudge 2.4s ease-in-out 2s infinite;
+}
+@keyframes nudge {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-4px);
+    letter-spacing: 0.38em;
+  }
+}
+
+.petals {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.petals i {
+  position: absolute;
+  top: -40px;
+  width: calc(14px * var(--s));
+  height: calc(18px * var(--s));
+  border-radius: 80% 0 80% 0;
+  background: linear-gradient(135deg, #fff, #f1c9c0 60%, #e2a9a3);
+  opacity: 0.85;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  0% {
+    transform: translate(0, -10vh) rotate(0);
+  }
+  25% {
+    transform: translate(var(--sway), 22vh) rotate(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--sway) * -1), 50vh) rotate(180deg);
+  }
+  75% {
+    transform: translate(var(--sway), 78vh) rotate(270deg);
+  }
+  100% {
+    transform: translate(0, 110vh) rotate(360deg);
+  }
+}
+.gate.s2 .petals {
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+
+.sparkles {
+  position: absolute;
+  inset: -14%;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(201, 143, 138, 0.9));
+  transition: opacity 0.3s;
+}
+.sparkles i {
+  position: absolute;
+  width: 14px;
+  aspect-ratio: 1;
+  background: linear-gradient(#fff, #f3d3c4);
+  clip-path: polygon(
+    50% 0,
+    61% 39%,
+    100% 50%,
+    61% 61%,
+    50% 100%,
+    39% 61%,
+    0 50%,
+    39% 39%
+  );
+  animation: twinkle 2.8s ease-in-out infinite;
+  transform: scale(0);
+}
+.sparkles i:nth-child(1) {
+  top: 8%;
+  left: 6%;
+}
+.sparkles i:nth-child(2) {
+  top: 2%;
+  right: 14%;
+  width: 18px;
+  animation-delay: 0.7s;
+}
+.sparkles i:nth-child(3) {
+  top: 46%;
+  right: 0;
+  animation-delay: 1.4s;
+}
+.sparkles i:nth-child(4) {
+  bottom: 14%;
+  left: 2%;
+  animation-delay: 2.1s;
+}
+.sparkles i:nth-child(5) {
+  bottom: 4%;
+  right: 10%;
+  width: 10px;
+  animation-delay: 0.35s;
+}
+.sparkles i:nth-child(6) {
+  top: 40%;
+  left: -2%;
+  width: 10px;
+  animation-delay: 1.05s;
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(0) rotate(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1) rotate(90deg);
+    opacity: 1;
+  }
+}
+.gate.s1 .sparkles i {
+  animation-duration: 0.6s;
+}
+.gate.s2 .sparkles {
+  opacity: 0;
+}
+
+/* Gift card springs in */
+.page.shown .gift-card {
+  animation: cardin 1s cubic-bezier(0.2, 0.9, 0.3, 1.15) 0.15s both;
+}
+@keyframes cardin {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.94);
+  }
+}
+.page.shown .gift-card > * {
+  animation: rise 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.page.shown .gift-card > :nth-child(1) {
+  animation-delay: 0.35s;
+}
+.page.shown .gift-card > :nth-child(2) {
+  animation-delay: 0.45s;
+}
+.page.shown .gift-card > :nth-child(3) {
+  animation-delay: 0.6s;
+}
+.page.shown .gift-card > :nth-child(4) {
+  animation-delay: 0.75s;
+}
+
+/* Little interactions */
+.nets button:active {
+  transform: scale(0.92);
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.err {
+  animation: shake 0.45s ease;
+}
+@keyframes shake {
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.tick {
+  position: relative;
+}
+.tick::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--rose);
+  opacity: 0;
+  animation: ring 1.6s ease-out 0.3s 2;
+}
+@keyframes ring {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+/* Confetti rain */
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti i {
+  position: absolute;
+  top: -20px;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  background: #c98f8a;
+  animation: rain cubic-bezier(0.3, 0.2, 0.6, 1) both;
+}
+.confetti i.k1 {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ebc4b7;
+}
+.confetti i.k2 {
+  width: 6px;
+  height: 12px;
+  background: #c9a24a;
+}
+.confetti i.k3 {
+  width: 12px;
+  height: 12px;
+  border-radius: 80% 0 80% 0;
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--line);
+}
+@keyframes rain {
+  from {
+    transform: translate(0, 0) rotate(var(--r));
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--sway), 110vh) rotate(calc(var(--r) + 720deg));
+    opacity: 0;
+  }
+}
+
+/* Letter photo slow zoom, moments stagger, beating & */
+.photo img {
+  transform: scale(1.12);
+}
+.photo.in img {
+  animation: kenburns 12s ease-out forwards;
+}
+@keyframes kenburns {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.strip.in img {
+  animation: rise 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.strip.in img:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.strip.in img:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.strip img {
+  transition: transform 0.5s ease;
+}
+.strip img:hover {
+  transform: scale(1.03);
+}
+.names-sm i {
+  display: inline-block;
+  animation: beat 2.4s ease-in-out infinite;
+}
+@keyframes beat {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.18);
+  }
+  40% {
+    transform: scale(0.96);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1072,5 +1497,13 @@ footer {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+  .petals,
+  .sparkles,
+  .confetti {
+    display: none;
+  }
+  .photo img {
+    transform: none;
   }
 }

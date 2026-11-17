@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   const network = body.network;
   if (body.phone && !phone)
     return fail(
-      "That phone number doesn't look right. Use the 11-digit format, e.g. 0805 036 6355.",
+      "That phone number doesn't look right. Use the 11-digit format, e.g. 0805 039 6354.",
     );
   if (network !== undefined && !isNetwork(network))
     return fail("Please pick your network.");
