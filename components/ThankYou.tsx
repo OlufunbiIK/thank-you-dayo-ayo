@@ -380,7 +380,7 @@ export default function ThankYou({
                       inputMode="tel"
                       value={form.phone}
                       onChange={(e) => onPhone(e.target.value)}
-                      placeholder="Phone number, e.g. 0805 036 6355"
+                      placeholder="Phone number, e.g. 0800 000 0000"
                       aria-label="Phone number"
                     />
                     <div
